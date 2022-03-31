@@ -1,5 +1,6 @@
 import requests
 import os
+import os.path
 import datetime
 from dotenv import load_dotenv
 import spotipy
@@ -30,6 +31,15 @@ def get_latest_editions():
     try:
         editons = requests.get(url_get_editions).json()
         last_edition = editons['editions'][0]
+
+        if os.path.isfile('last.txt'):
+            f = open('last.txt', 'r')
+            last_version = f.read()
+            if last_version == str(last_edition['id']):
+                print('Version not updated\nQuiting Program..')
+                f.close()
+                exit()
+
     except Exception as e:
         print(e)
         print('ERROR getting edition Q-Top 40')
@@ -76,12 +86,19 @@ def add_songs_to_playlist(top40):
 
 def change_description():
     now = datetime.datetime.now()
-    spotify.playlist_change_details(playlist_id=playlist_id, description=f'De beste hits van het moment in België met wekelijkse updates.  (laatste update: {now.strftime("%m/%d/%Y %H:%M:%S")})')
+    spotify.playlist_change_details(playlist_id=playlist_id, description=f'De beste hits van het moment in België met wekelijkse updates.  (laatste update: {now.strftime("%d/%m/%Y %H:%M:%S")})')
 
+
+def save_new_version(latest):
+    f = open('last.txt', 'w')
+    f.write(str(latest['id']))
+    f.close()
 
 if __name__ == '__main__':
     latest = get_latest_editions()
+    print('Updating Playlist')
     top40 = get_top40(latest)
     clear_playlist()
     add_songs_to_playlist(top40)
     change_description()
+    save_new_version(latest)
