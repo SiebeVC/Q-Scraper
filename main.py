@@ -18,10 +18,10 @@ from spotipy.oauth2 import SpotifyOAuth
 load_dotenv()
 spot_client = os.getenv('spot_client')
 spot_key = os.getenv('spot_key')
+username = os.getenv('username')
 
 
 scope = 'playlist-modify-public playlist-modify-private playlist-read-private'
-username = 'siebevc'
 
 token = SpotifyOAuth(scope=scope, username=username, client_secret=spot_key, client_id=spot_client)
 
