@@ -133,8 +133,12 @@ def change_description() -> None:
     spotify.playlist_change_details(playlist_id=playlist_id, description=f'De beste hits van het moment in België met wekelijkse updates.  (laatste update: {now.strftime("%d/%m/%Y %H:%M:%S")})')
 
 
-def save_new_version(latest: dict):
-
+def save_new_version(latest: dict) -> None:
+    """
+    Saved the latest id in a local file.
+    :param latest: latest from api
+    :return: None
+    """
     f = open('last.txt', 'w')
     f.write(str(latest['id']))
     f.close()
