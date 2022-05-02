@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q-music Top 40</title>
+</head>
+<style>
+    body{
+        font-family: 'Arial';
+
+        max-width: 1000px;
+        margin-left: auto;
+        margin-right: auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    
+    .playlist-container{
+        border: 3px solid rgb(202, 67, 67) ;
+        padding: 20px;
+        border-radius: 15px;
+
+        display: flex;
+        flex-direction: column;
+
+    }
+
+    button{
+        background-color: #8acb88;
+        border: 1px solid #70a36e;
+        border-radius: 5px;
+        padding: 10px 20px;
+        font-weight: bold;
+    }
+
+    button:hover{
+        background-color: #70a36e;
+        transition: .3s;
+    }
+
+    .reload{
+        text-align: center;
+        display: block;
+        margin: 5px;
+    }
+
+    .Q{
+        color:rgb(202, 67, 67);
+    }
+
+
+</style>
+<body>
+
+    <h1>Spotify Playlists:</h1>
+    <div class="playlist-container">
+        <h2 class="Q">Q-music Top 40</h2>
+        <span id="return-top40" class="reload"></span>
+        <button id="btn-fetch" onclick="fetch_lijst('top40')">Haal op</button>
+    </div>
+
+
+    <script>
+        async function fetch_lijst(list){
+            const hrf = document.location.origin.replace('5500', '8000') + '/' + list;
+            const span = document.getElementById('return-' + list)
+
+            span.innerText = 'Aan het laden...'
+
+            const ret = await (await fetch(hrf)).json()
+
+            span.innerText = ret.action
+        }
+    </script>
+</body>
+</html>

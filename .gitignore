@@ -1,4 +1,6 @@
 .env
 .cache
 .cache-siebevc
+.cache-vcsie
+__pycache__/
 last.txt
