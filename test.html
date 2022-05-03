@@ -7,9 +7,15 @@
     <title>Q-music Top 40</title>
 </head>
 <style>
-    body{
-        font-family: 'Arial';
+    @import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&display=swap');
+    :root{
+        --spot-green: #2AD765;
+        --spot-green-hover: #36E271;
+    }
 
+    body{
+        font-family: 'Kalam', cursive, 'Arial';
+        background-color: #F4F4F4;
         max-width: 1000px;
         margin-left: auto;
         margin-right: auto;
@@ -18,28 +24,39 @@
         align-items: center;
     }
 
+    a{
+        color: var(--spot-green);
+        text-decoration: none;
+    }
+
     
     .playlist-container{
-        border: 3px solid rgb(202, 67, 67) ;
-        padding: 20px;
-        border-radius: 15px;
+        background-color: white;
+        box-shadow: -1px 1px 5px #AAA;
+
+        text-align: left;
+        width: 400px;
+        padding: 20px 30px;
+        border-radius: 5px;
 
         display: flex;
         flex-direction: column;
 
+        font-size: 20px;
     }
 
     button{
-        background-color: #8acb88;
-        border: 1px solid #70a36e;
-        border-radius: 5px;
+        background-color: var(--spot-green);   
+        border: none;
+        border-radius: 20px;
         padding: 10px 20px;
         font-weight: bold;
+        font-size: 16px;
     }
 
     button:hover{
-        background-color: #70a36e;
-        transition: .3s;
+        background-color: var(--spot-green-hover);
+        padding: 12px;
     }
 
     .reload{
@@ -47,33 +64,36 @@
         display: block;
         margin: 5px;
     }
-
-    .Q{
-        color:rgb(202, 67, 67);
-    }
-
-
 </style>
 <body>
 
     <h1>Spotify Playlists:</h1>
     <div class="playlist-container">
-        <h2 class="Q">Q-music Top 40</h2>
+        <h2>Q-music Top 40</h2>
+        <p class="descr">
+            De beste hits van het moment in Belgi&euml; met wekelijkse updates.
+        </p>
+        <p>
+            <a href="https://open.spotify.com/playlist/1mLwHc4J6c6Hkdctk5Yx4S?si=35325db3ecd048a0" target="_blank" rel="noopener noreferrer">Bekijk op Spotify</a>
+        </p>
+        <button id="btn-top40" onclick="fetch_lijst('top40')">Update Playlist</button>
         <span id="return-top40" class="reload"></span>
-        <button id="btn-fetch" onclick="fetch_lijst('top40')">Haal op</button>
     </div>
 
 
     <script>
         async function fetch_lijst(list){
-            const hrf = document.location.origin.replace('5500', '8000') + '/' + list;
-            const span = document.getElementById('return-' + list)
+            const hrf = document.location.origin + '/' + list;
+            const span = document.getElementById('return-' + list);
+            const btn = document.getElementById('btn-' + list);
 
-            span.innerText = 'Aan het laden...'
+            btn.disabled  = true;
+            span.innerText = 'Aan het laden...';
 
-            const ret = await (await fetch(hrf)).json()
+            const ret = await (await fetch(hrf)).json();
 
-            span.innerText = ret.action
+            span.innerText = ret.action;
+            btn.disabled = false;
         }
     </script>
 </body>

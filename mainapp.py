@@ -14,23 +14,9 @@ import datetime
 from dotenv import load_dotenv
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
-
-load_dotenv()
-spot_client = os.getenv('spot_client')
-spot_key = os.getenv('spot_key')
-username = os.getenv('username')
-
+import pickle
 
 scope = 'playlist-modify-public playlist-modify-private playlist-read-private'
-
-token = SpotifyOAuth(scope=scope, username=username, client_secret=spot_key, client_id=spot_client)
-
-spotify = spotipy.Spotify(auth_manager=token)
-
-url_get_editions = os.getenv('url_get_editions')
-url_get_top40 = os.getenv('url_get_top40')
-playlist_id = os.getenv('playlist_id')
-
 
 def get_latest_editions() -> dict:
     """
@@ -45,10 +31,8 @@ def get_latest_editions() -> dict:
             f = open('last.txt', 'r')
             last_version = f.read()
             if last_version == str(last_edition['id']):
-                print('Version not updated\nQuiting Program..')
+                print('Version not updated')
                 f.close()
-                raise 'Er is geen nieuwe versie van de playlist bechikbaar.'
-
     except Exception as e:
         print(e)
         print('ERROR getting edition Q-Top 40')
@@ -68,9 +52,9 @@ def get_top40(last_edition: dict) -> list:
         response = requests.get(url_get_top40.format(last_edition["id"]))
         top40 = response.json()['tracks']
         if len(top40) != 40:
-            print(f'Geen 40 tracks gevonden ({len(top40)})\nQuiting Program')
-            raise f'Geen 40 liedjes gevonden. (Slechts: {len(top40)})'
-        print('40 tracks gevonden')
+            print(f'Geen 40 tracks gevonden ({len(top40)})')
+        else:
+            print('40 tracks gevonden')
     except Exception as e:
         print(e)
         print(f'ERROR getting last edition with id {last_edition["id"]} op datum {last_edition["name"]}')
@@ -133,23 +117,56 @@ def change_description() -> None:
     spotify.playlist_change_details(playlist_id=playlist_id, description=f'De beste hits van het moment in België met wekelijkse updates.  (laatste update: {now.strftime("%d/%m/%Y %H:%M:%S")})')
 
 
-def save_new_version(latest: dict) -> None:
+def save_new_version(latest: dict, dic: dict) -> None:
     """
     Saved the latest id in a local file.
     :param latest: latest from api
     :return: None
     """
-    f = open('last.txt', 'w')
-    f.write(str(latest['id']))
-    f.close()
+    dic['top40']['id'] = latest['id']
+    with open('updates.pickle', 'wb') as to:
+        pickle.dump(dic, to, protocol=pickle.HIGHEST_PROTOCOL)
 
 
-def reload_playlist():
+spotify = None
+
+load_dotenv()
+url_get_editions = os.getenv('url_get_editions')
+url_get_top40 = ''
+playlist_id = ''
+
+def reload_playlist(spot_cli, spot_key, username, url_edition, url_top40, playlist):
+    global spotify, url_get_editions, url_get_top40, playlist_id
+    spot_client = spot_cli
+
+    token = SpotifyOAuth(scope=scope, username=username, client_secret=spot_key, client_id=spot_client, redirect_uri='127.0.0.1')
+    spotify = spotipy.Spotify(auth_manager=token)
+    url_get_editions = url_edition
+    url_get_top40 = url_top40
+    playlist_id = playlist
+
+    #Check is updatet adhv id
     latest: dict = get_latest_editions()
-    print('Updating Playlist')
+    with open('updates.pickle', 'rb') as fr:
+        try:
+            dic = pickle.load(fr)
+            print(dic)
+            check_latest = dic['top40']['id']
+        except:
+            check_latest = 0
+
+            
+
+    if (int(check_latest) == int(latest["id"])):
+        return 'Er is geen nieuwe versie beschikbaar.'
+
     top40 = get_top40(latest)
+    if len(top40) != 40:
+        return f'Geen 40 tracks gevonden (Slechts {len(top40)}). Probeer binnen een paar uur opnieuw.'
+
+    print('Aan het updateten')
     clear_playlist()
     add_songs_to_playlist(top40)
     change_description()
-    save_new_version(latest)
+    save_new_version(latest, dic)
     return 'De playlist is geüpdatet.'
